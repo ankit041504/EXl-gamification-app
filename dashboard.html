@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>EXL AI Hackathon League — Top 10 Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --panel:#131315;
+    --panel-2:#1A1A1D;
+    --line:rgba(255,255,255,0.12);
+    --text:#F5F5F5;
+    --text-dim:#8C8C93;
+    --accent:#D8FF3D;
+    --accent-text:#0A0A0A;
+    --cat1:#D8FF3D; /* Productivity Lift */
+    --cat2:#5B9BD5; /* Accuracy Lift */
+    --cat3:#B18AF0; /* Project Management */
+    --cat4:#34D399; /* New & Unique Idea */
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Inter', -apple-system, sans-serif; min-height:100vh;
+  }
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; margin:0;}
+  .mono{font-family:'Space Mono', monospace;}
+  .wrap{max-width:980px; margin:0 auto; padding:22px 20px 60px;}
+
+  /* ---------- Header ---------- */
+  .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; padding-bottom:14px; border-bottom:1px solid var(--line); flex-wrap:wrap; gap:10px;}
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brandmark{font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:20px;}
+  .tagline{font-family:'Space Grotesk', sans-serif; font-style:italic; font-weight:600; font-size:13px; color:var(--accent);}
+  .nav-link{
+    color:var(--text); text-decoration:none; font-size:13px; font-weight:600;
+    border:1px solid var(--line); border-radius:8px; padding:8px 14px;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .nav-link:active{background:var(--panel-2);}
+
+  .page-head{margin:22px 0 26px;}
+  .kicker{color:var(--text-dim); font-size:13px; margin-bottom:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em;}
+  .page-head h1{font-size:clamp(24px,4.5vw,34px); line-height:1.2; margin-bottom:8px;}
+  .page-head p{color:var(--text-dim); font-size:15px; line-height:1.6; max-width:560px;}
+
+  /* ---------- Card grid ---------- */
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:640px){ .grid{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px;
+    cursor:pointer; transition:border-color 0.15s ease, background 0.15s ease;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .card:active{background:var(--panel-2); border-color:var(--accent);}
+  .card-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+  .rank{
+    font-family:'Space Mono', monospace; font-size:12px; font-weight:700; color:var(--text-dim);
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px; flex:none;
+  }
+  .impact-pill{
+    font-family:'Space Mono', monospace; font-size:12px; font-weight:700; color:var(--accent-text);
+    background:var(--accent); border-radius:6px; padding:3px 8px; flex:none;
+  }
+  .card-headline{font-size:15px; font-weight:600; line-height:1.4;}
+  .card-team{font-size:13px; color:var(--text-dim);}
+  .card-cat{display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-dim);}
+  .swatch{width:8px; height:8px; border-radius:2px; flex:none;}
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:1000;
+    align-items:flex-end; justify-content:center;
+  }
+  .modal-backdrop.active{display:flex;}
+  @media (min-width:640px){ .modal-backdrop{align-items:center;} }
+  .modal{
+    background:var(--panel); border:1px solid var(--line); border-radius:18px 18px 0 0;
+    padding:26px 22px 30px; width:100%; max-width:600px; max-height:86vh; overflow-y:auto;
+  }
+  @media (min-width:640px){ .modal{border-radius:18px;} }
+  .modal-top{display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:6px;}
+  .modal-close{
+    background:transparent; border:1px solid var(--line); color:var(--text); border-radius:8px;
+    width:34px; height:34px; font-size:16px; cursor:pointer; flex:none;
+    font-family:'Space Grotesk', sans-serif;
+  }
+  .modal-rank{font-family:'Space Mono', monospace; font-size:12px; color:var(--text-dim); margin-bottom:6px;}
+  .modal h2{font-size:20px; line-height:1.35; margin-bottom:10px;}
+  .modal-cat{display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-dim); margin-bottom:16px;}
+  .modal-summary{font-size:14.5px; line-height:1.65; color:var(--text-dim); margin-bottom:20px;}
+  .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .stat-box{background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:12px 14px;}
+  .stat-label{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px;}
+  .stat-value{font-family:'Space Mono', monospace; font-size:17px; font-weight:700;}
+  .stat-box.full{grid-column:1 / -1;}
+  .stat-box.full .stat-value{font-size:14px; font-weight:600; font-family:'Inter',sans-serif; line-height:1.5;}
+
+  footer{margin-top:30px; text-align:center; color:var(--text-dim); font-size:12px;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <span class="brandmark">EXL</span>
+      <span class="tagline"></span>
+    </div>
+    <a class="nav-link" href="index.html">Play the match game →</a>
+  </div>
+
+  <div class="page-head">
+    <div class="kicker">AI Hackathon League</div>
+    <h1>Top 10 entries by impact score</h1>
+    <p>Ranked by impact score out of 100. Tap any card for the full use case — team, AI tools used, and the productivity and accuracy lift delivered.</p>
+  </div>
+
+  <div class="grid" id="cardGrid"></div>
+
+  <footer>Built for the EXL AI Hackathon League</footer>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeModal()">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+const POOL = [
+  {
+    team: "Project B-Scale",
+    idea: "AI Powered Data Integrity at Scale — From 60% Dropped Records to Complete Ingestion",
+    summary: "Discovered that Spark's native Parquet reader was silently dropping 60% of records across 13,000+ files (28 billion records!) due to schema mismatches. Used GitLab Duo's chain-of-thought and few-shot prompting to design a checksum-based grouping strategy that processes all files without loss. A genuinely critical data-integrity fix, lifting accuracy by 60%.",
+    category: 1,
+    tools: "GitLab Duo",
+    prodLift: "90%",
+    accLift: "50%",
+    impact: 62
+  },
+  {
+    team: "Magnum",
+    idea: "GitLab Duo in Action — AI Across the Development Lifecycle — atleast 30-40% Productivity Boost",
+    summary: "Leverage GitLab Duo for code generation, completion, defect analysis, test-case generation, and automated code review on every merge request. Cut per-developer weekly workload from 40 hours to 30 hours through consistent AI assistance. A broad, practical showcase of Duo's impact across the full development cycle.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "67%",
+    accLift: "15%",
+    impact: 55
+  },
+  {
+    team: "Aether Minds",
+    idea: "AI Powered Code Refactoring Accelerator — Boosted code accuracy from 75% to 95% and Faster Delivery",
+    summary: "An AI-augmented development platform that eliminates manual refactoring bottlenecks using structured, context-aware GitLab Duo prompt pipelines. Boosted code accuracy from 75% to 95% and application response time from 20s down to 2–3s. Frees up 18 engineering hours per developer weekly while catching defects before they hit production.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "61%",
+    accLift: "20%",
+    impact: 54
+  },
+  {
+    team: "Byte Force",
+    idea: "PowerShell Scripting, Reimagined — 4x Faster, More Accurate File Transfers",
+    summary: "Moved from manually coding PowerShell scripts for inter-server file transfers to an AI agent that generates full scripts from plain-language requirements. Boosted accuracy from 75% to 90% while cutting development time from 20 hours to just 5 hours a week. Human-in-the-loop review keeps quality intact while AI handles the heavy lifting.",
+    category: 0,
+    tools: "MS Copilot",
+    prodLift: "75%",
+    accLift: "15%",
+    impact: 53
+  },
+  {
+    team: "Artificially Intelligent",
+    idea: "Reusable AI Powered Data Validation Factory for Data Feeds",
+    summary: "Automated the end-to-end control validation lifecycle — creation, reconciliation, execution, exception analysis, and audit reporting. Reduced validation effort by ~89%, making it immediately reusable across teams. A blueprint for AI-powered controls automation at enterprise scale.",
+    category: 3,
+    tools: "MS Copilot, GitLab Duo",
+    prodLift: "89%",
+    accLift: "15%",
+    impact: 53
+  },
+  {
+    team: "Ronin",
+    idea: "Copliot Powered SmartQA Agent — Accelerating Quality Engineering with AI",
+    summary: "Built a Copilot-based QA agent that reads JIRA stories and generates comprehensive test cases, then assists with automation debugging and root-cause analysis. Needs only ~10% human validation before execution, keeping governance intact and accelerating regression cycles.",
+    category: 0,
+    tools: "MS Copilot",
+    prodLift: "50%",
+    accLift: "30%",
+    impact: 52
+  },
+  {
+    team: "TraceIQ",
+    idea: "Agentic QA — Test Case Generation Meets Requirement Drift Detection",
+    summary: "Built resuable Copilot-powered agents and curated prompt frameworks that transform JIRA stories, emails, and docs to auto-generate comprehensive test scenarios while also flagging requirement drift. Delivered a 50% reduction in manual testing effort and 3–4 hours of daily productivity savings, alongside broader test coverage and faster regression cycles. Human-in-the-loop review keeps governance intact throughout.",
+    category: 3,
+    tools: "MS Copilot, GitLab Duo",
+    prodLift: "43%",
+    accLift: "15%",
+    impact: 49
+  },
+  {
+    team: "BAQAI Force",
+    idea: "2x Faster BA & QA Delivery — Enterprise AI Across the SDLC",
+    summary: "Embedded AI across requirements gathering, knowledge retrieval, analytics, and QA test prep — cutting documentation effort by 60%, search time by 90%, and analysis effort by 80%. Test-case creation for hundreds of scenarios saw a 60% effort reduction too. The combined effect: nearly double the delivery speed across the whole software lifecycle.",
+    category: 2,
+    tools: "MS Copilot, GitLab Duo",
+    prodLift: "50%",
+    accLift: "10%",
+    impact: 48
+  },
+  {
+    team: "Justice League",
+    idea: "Metadata Tracking, Automated — 88% Faster Big Data Workflows",
+    summary: "Built a GitLab Duo-powered Python script to automatically track job metadata (dataset versions, row counts, execution times) across 60–600 daily jobs. Cut per-run tracking time from 60 minutes to just 6–7 minutes, while pushing accuracy from ~90% to a full 100%. A small script with an outsized impact on operational cost control.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "89%",
+    accLift: "13%",
+    impact: 47
+  },
+  {
+    team: "EXL_AI",
+    idea: "From Manual Firefighting to Autonomous Engineering — Powered by GitLab Duo",
+    summary: "Built AI powered platform that automates storage optimization, error detection, and code workflows end-to-end. Structured \"detect→analyze→resolve→generate\" prompt pipelines kept AI outputs precise and production-safe, backed by a SonarQube + AI double-gate — reusable across QA, Data Engineering, and Infra teams.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "67%",
+    accLift: "5%",
+    impact: 46
+  }
+];
+
+const CATEGORIES = [
+  { name: "Productivity Lift",   swatch: "var(--cat1)" },
+  { name: "Accuracy Lift",       swatch: "var(--cat2)" },
+  { name: "Project Management",  swatch: "var(--cat3)" },
+  { name: "New & Unique Idea",   swatch: "var(--cat4)" }
+];
+
+function renderGrid(){
+  const ranked = POOL.slice().sort((a,b) => b.impact - a.impact);
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = ranked.map((item, i) => {
+    const cat = CATEGORIES[item.category];
+    return `
+      <div class="card" onclick="openModal(${i})">
+        <div class="card-top">
+          <span class="rank mono">#${i+1}</span>
+          <span class="impact-pill mono">${item.impact}/100</span>
+        </div>
+        <div class="card-headline">${item.idea}</div>
+        <div class="card-team">${item.team}</div>
+        <div class="card-cat"><span class="swatch" style="background:${cat.swatch}"></span>${cat.name}</div>
+      </div>
+    `;
+  }).join('');
+  window._ranked = ranked;
+}
+
+function openModal(i){
+  const item = window._ranked[i];
+  const cat = CATEGORIES[item.category];
+  document.getElementById('modal').innerHTML = `
+    <div class="modal-top">
+      <div>
+        <div class="modal-rank">RANK #${i+1} OF 10</div>
+        <h2>${item.idea}</h2>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-cat"><span class="swatch" style="background:${cat.swatch}"></span>${cat.name}</div>
+    <div class="modal-summary">${item.summary}</div>
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-label">Team</div><div class="stat-value">${item.team}</div></div>
+      <div class="stat-box"><div class="stat-label">Impact score</div><div class="stat-value">${item.impact}/100</div></div>
+      <div class="stat-box"><div class="stat-label">Productivity lift</div><div class="stat-value">${item.prodLift}</div></div>
+      <div class="stat-box"><div class="stat-label">Accuracy lift</div><div class="stat-value">${item.accLift}</div></div>
+      <div class="stat-box full"><div class="stat-label">AI tools used</div><div class="stat-value">${item.tools}</div></div>
+    </div>
+  `;
+  document.getElementById('modalBackdrop').classList.add('active');
+}
+
+function closeModal(){
+  document.getElementById('modalBackdrop').classList.remove('active');
+}
+
+renderGrid();
+</script>
+</body>
+</html>

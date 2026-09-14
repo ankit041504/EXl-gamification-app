@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>EXL AI Symposium - "Innovation Bottoms Up"</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --panel:#131315;
+    --panel-2:#1A1A1D;
+    --line:rgba(255,255,255,0.12);
+    --text:#F5F5F5;
+    --text-dim:#8C8C93;
+    --accent:#D8FF3D;
+    --accent-text:#0A0A0A;
+    --good:#D8FF3D;
+    --bad:#FF6B57;
+    --cat1:#D8FF3D; /* Productivity Lift */
+    --cat2:#5B9BD5; /* Accuracy Lift */
+    --cat3:#B18AF0; /* Project Management */
+    --cat4:#34D399; /* New & Unique Idea */
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; -webkit-user-select:none; user-select:none;}
+  html,body{height:100%; overscroll-behavior:none;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Inter', -apple-system, sans-serif; min-height:100vh;
+    touch-action:none;
+  }
+  h1,h2,h3{font-family:'Space Grotesk', sans-serif; margin:0;}
+  .mono{font-family:'Space Mono', monospace;}
+  .wrap{max-width:1200px; margin:0 auto; padding:22px 20px 50px;}
+
+  /* ---------- Header ---------- */
+  .topbar{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap;}
+  .brand{display:flex; align-items:center; gap:14px;}
+  .logo{
+    width:46px; height:46px; border-radius:12px; display:grid; place-items:center; flex:none;
+    background:var(--accent); color:var(--accent-text); font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:15px;
+  }
+  h1{font-size:clamp(18px,2.6vw,26px); letter-spacing:-0.01em;}
+  .sub{color:var(--text-dim); font-size:12.5px; margin-top:3px;}
+  .controls{display:flex; gap:8px; flex-wrap:wrap;}
+  .ctrl-btn, .nav-link{
+    font:600 13px 'Space Grotesk', sans-serif; border:1px solid var(--line); background:var(--panel);
+    color:var(--text); padding:9px 14px; border-radius:10px; cursor:pointer; text-decoration:none; display:inline-block;
+  }
+  .ctrl-btn:active, .nav-link:active{background:var(--panel-2);}
+
+  /* ---------- Stats ---------- */
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:18px;}
+  .stat{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px;}
+  .stat .k{font-size:10.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em; font-weight:600;}
+  .stat .v{font-family:'Space Mono', monospace; font-size:22px; font-weight:700; margin-top:5px;}
+  .progress{height:6px; background:var(--panel-2); border-radius:99px; overflow:hidden; margin-top:8px;}
+  .progress>div{height:100%; width:0; background:var(--accent); transition:width 0.35s ease;}
+
+  /* ---------- Game grid ---------- */
+  .game{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px;}
+  @media (max-width:900px){ .game{grid-template-columns:1fr;} }
+  .card, .themes{background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:20px;}
+  .section-label{font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); font-weight:700;}
+
+  .summary-card{
+    margin-top:14px; border:1px solid var(--line); border-radius:14px; padding:20px;
+    background:var(--panel-2); cursor:grab; min-height:280px;
+    display:flex; flex-direction:column; justify-content:space-between; touch-action:none;
+  }
+  .summary-card.dragging{
+    position:fixed; z-index:1000; pointer-events:none; box-shadow:0 20px 44px rgba(0,0,0,0.55);
+    border-color:var(--accent); opacity:0.95;
+  }
+  .summary-card.snapback{transition:left 0.28s ease, top 0.28s ease;}
+  .meta{display:flex; gap:8px; flex-wrap:wrap;}
+  .pill{font-size:11px; color:var(--text-dim); border:1px solid var(--line); background:var(--panel); padding:6px 10px; border-radius:99px;}
+  .summary{font-size:15.5px; line-height:1.65; color:var(--text); margin:18px 0;}
+  .hint{font-size:12px; color:var(--text-dim);}
+  .tools{margin-top:-4px; padding:10px 14px; border-left:3px solid var(--accent); background:var(--panel); border-radius:0 8px 8px 0; color:var(--text-dim); font-size:12.5px; line-height:1.5;}
+  .tools strong{color:var(--text); font-weight:700;}
+
+  .themes-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px;}
+  .drop{
+    min-height:150px; border:1px dashed var(--line); border-radius:14px; padding:16px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    background:var(--panel-2); transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .drop.over{border-color:var(--accent); background:var(--panel);}
+  .drop.correct{border-style:solid; border-color:var(--good); box-shadow:0 0 0 1px var(--good) inset;}
+  .drop.wrong{border-style:solid; border-color:var(--bad);}
+  .theme-badge{
+    width:30px; height:30px; border-radius:8px; display:grid; place-items:center;
+    font-family:'Space Grotesk', sans-serif; font-weight:800; font-size:14px; color:#0A0A0A; margin-bottom:10px;
+  }
+  .drop[data-code="P"] .theme-badge{background:var(--cat1);}
+  .drop[data-code="A"] .theme-badge{background:var(--cat2);}
+  .drop[data-code="M"] .theme-badge{background:var(--cat3);}
+  .drop[data-code="N"] .theme-badge{background:var(--cat4);}
+  .theme-name{font-family:'Space Grotesk', sans-serif; font-size:14.5px; font-weight:700; line-height:1.3;}
+  .drop-hint{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; margin-top:10px;}
+
+  .feedback{margin-top:16px; border-radius:12px; padding:14px 16px; display:none; font-size:13.5px; line-height:1.55;}
+  .feedback.show{display:block;}
+  .feedback.ok{background:rgba(216,255,61,0.08); border:1px solid rgba(216,255,61,0.35);}
+  .feedback.no{background:rgba(255,107,87,0.08); border:1px solid rgba(255,107,87,0.35);}
+  .feedback strong{color:var(--text);}
+  .feedback .dim{color:var(--text-dim);}
+
+  .nextrow{display:flex; justify-content:space-between; align-items:center; margin-top:14px; gap:10px; flex-wrap:wrap;}
+  .primary-btn{
+    background:var(--accent); color:var(--accent-text); border:none; border-radius:10px;
+    padding:12px 24px; font-size:14px; font-weight:700; font-family:'Space Grotesk',sans-serif; cursor:pointer;
+  }
+  .primary-btn:disabled{opacity:0.35; cursor:not-allowed;}
+  .primary-btn:active:not(:disabled){transform:scale(0.98);}
+
+  /* ---------- Finish screen ---------- */
+  .finish{display:none; text-align:center; padding:60px 20px;}
+  .finish.show{display:block;}
+  .finish h2{font-size:30px; margin:10px 0;}
+  .bigscore{font-family:'Space Mono', monospace; font-size:54px; font-weight:700; color:var(--accent);}
+  .finish p{color:var(--text-dim); margin:14px 0 24px;}
+
+  footer{margin-top:30px; text-align:center; color:var(--text-dim); font-size:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">AI</div>
+      <div>
+        <h1>EXL AI Symposium - "Innovation Bottoms Up"</h1>
+        <div class="sub">AI Impact League · Theme Match Challenge</div>
+      </div>
+    </div>
+    <div class="controls">
+      <a class="nav-link" href="dashboard.html">Dashboard →</a>
+      <button class="ctrl-btn" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+      <button class="ctrl-btn" onclick="restart()">↻ Restart</button>
+    </div>
+  </header>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="k">Round</div>
+      <div class="v mono"><span id="round">1</span>/<span id="total"></span></div>
+      <div class="progress"><div id="prog"></div></div>
+    </div>
+    <div class="stat">
+      <div class="k">Correct</div>
+      <div class="v mono" id="correct">0</div>
+    </div>
+    <div class="stat">
+      <div class="k">Game Score</div>
+      <div class="v mono" id="score">0</div>
+    </div>
+  </section>
+
+  <main id="game" class="game">
+    <section class="card">
+      <div class="section-label">01 · Read the summary</div>
+      <div id="summaryCard" class="summary-card">
+        <div>
+          <div class="meta">
+            <span class="pill" id="team">Team</span>
+            <span class="pill">Drag this card</span>
+          </div>
+          <div class="summary" id="summary">Loading…</div>
+          <div class="tools" id="tools"></div>
+        </div>
+        <div class="hint">Drag the summary → drop it on the theme that best matches the AI impact.</div>
+      </div>
+      <div id="feedback" class="feedback"></div>
+      <div class="nextrow">
+        <span class="hint" id="headlineHint"></span>
+        <button id="nextBtn" class="primary-btn" disabled onclick="nextRound()">Next Summary →</button>
+      </div>
+    </section>
+
+    <section class="themes">
+      <div class="section-label">02 · Choose the theme</div>
+      <div class="themes-grid" id="themes"></div>
+    </section>
+  </main>
+
+  <section id="finish" class="card finish">
+    <div class="section-label">AI Impact League complete</div>
+    <h2>Challenge Complete</h2>
+    <div class="bigscore mono" id="finalScore">0</div>
+    <p id="finalText"></p>
+    <button class="primary-btn" onclick="restart()">Play Again</button>
+  </section>
+
+  <footer>Built for the EXL AI Hackathon League</footer>
+</div>
+
+<script>
+/* ===================== DATA: all 30 hackathon ideas ===================== */
+const IDEAS = [
+  {
+    team: "EXL_AI",
+    idea: "From Manual Firefighting to Autonomous Engineering — Powered by GitLab Duo",
+    summary: "Built AI powered platform that automates storage optimization, error detection, and code workflows end-to-end. Structured \"detect→analyze→resolve→generate\" prompt pipelines kept AI outputs precise and production-safe, backed by a SonarQube + AI double-gate — reusable across QA, Data Engineering, and Infra teams.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "67%",
+    accLift: "5%",
+    impact: "46/100"
+  },
+  {
+    team: "AI Nexus",
+    idea: "Reusable AI Schema Migration Accelerator — Legacy Formats to Spark in Seconds",
+    summary: "A custom Copilot agent that reads legacy schemas (like Ab Initio DML) and auto-generates Spark-compatible outputs, eliminating manual mapping work. Cut schema conversion effort by 65–70% and tripled processing speed, taking developer effort from 25 hours down to 8.3 hours across 50 graphs. Built to scale across DML, Avro, and Parquet formats for faster migrations.",
+    category: 3,
+    tools: "MS Copilot, GitLab Duo",
+    prodLift: "38%",
+    accLift: "10%",
+    impact: "38/100"
+  },
+  {
+    team: "Copilot Crew",
+    idea: "Cognicodes Migration Engine: SAS-to-Python Conversion, Instantly, Inside Microsoft Teams",
+    summary: "A Teams-embedded Copilot agent that converts SAS code to production-ready Python on the spot, cutting one of data engineering's biggest migration bottlenecks. Slashed manual conversion time by 85% (120 min → 18 min) and cut syntax/logic errors by 65%. Saves each developer ~10 hours a week — with zero extra cost or onboarding time.",
+    category: 0,
+    tools: "MS Copilot",
+    prodLift: "28%",
+    accLift: "10%",
+    impact: "19/100"
+  },
+  {
+    team: "Vanguard Sentinel",
+    idea: "Simulate Before You Break It — Copilot-Powered Rule-Change Testing",
+    summary: "Instead of validating data changes only after deployment, this Copilot solution traces source fields through transformation logic to predict downstream impact before a single line of code changes. It gives teams evidence-backed impact analysis for stakeholder review, cutting rework and reducing risk. Reduced remediation effort by 92% while lifting efficiency by 15%.",
+    category: 3,
+    tools: "MS Copilot",
+    prodLift: "75%",
+    accLift: "20%",
+    impact: "45/100"
+  },
+  {
+    team: "Exl_Coll",
+    idea: "Smarter Code, Leaner Pipelines — Multi-AI Optimization at Work",
+    summary: "Used ChatGPT and GitHub Copilot together to refactor application code, cutting execution time by 30–40% and boosting maintainability by 25%. Also optimized AWS Glue ETL jobs by streamlining transformations and Spark execution plans. The result: faster data processing with lower resource consumption across the board.",
+    category: 0,
+    tools: "MS Copilot, GitLab Duo",
+    prodLift: "38%",
+    accLift: "10%",
+    impact: "24/100"
+  },
+  {
+    team: "Quantum Query",
+    idea: "Decoding Decades of Legacy Logic in Days, Not Months",
+    summary: "AI-assisted reverse engineering turned undocumented legacy scripts into a clear, business-readable data model — mapping source, intermediate, and target tables automatically. What used to take months of manual digging now takes days, saving 17.5 hours per week with a 4–7% accuracy lift. A genuine knowledge-transfer breakthrough for aging systems.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "88%",
+    accLift: "4%",
+    impact: "43/100"
+  },
+  {
+    team: "Null Exception",
+    idea: "Big Data Pipelines, Big Time Savings — 40% Faster Delivery with GitLab Duo",
+    summary: "Combined structured prompting and chain-of-thought debugging to cut Spark/Scala coding effort by 35–40% and speed up SIT execution by 60%. Duo catches partitioning and memory errors before human review, slashing production bugs by up to 90%. Net result: 30+ engineering hours reclaimed per sprint and zero manual Excel reporting.",
+    category: 1,
+    tools: "GitLab Duo",
+    prodLift: "40%",
+    accLift: "20%",
+    impact: "34/100"
+  },
+  {
+    team: "Fault Fighters",
+    idea: "Catching SAP Errors Before They Happen — AI-Powered Validation in Excel",
+    summary: "Turned manual SAP mapping-file checks into an automated, rule-based Copilot workflow that flags format, completeness, and consistency issues before upload. The reusable validation logic applies across multiple SAP interfaces and processes. Delivers ~4.5 hours of weekly productivity gains and 20% accuracy improvement.",
+    category: 1,
+    tools: "MS Copilot",
+    prodLift: "25%",
+    accLift: "20%",
+    impact: "32/100"
+  },
+  {
+    team: "Aether Minds",
+    idea: "AI Powered Code Refactoring Accelerator — Boosted code accuracy from 75% to 95% and Faster Delivery",
+    summary: "An AI-augmented development platform that eliminates manual refactoring bottlenecks using structured, context-aware GitLab Duo prompt pipelines. Boosted code accuracy from 75% to 95% and application response time from 20s down to 2–3s. Frees up 18 engineering hours per developer weekly while catching defects before they hit production.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "61%",
+    accLift: "20%",
+    impact: "54/100"
+  },
+  {
+    team: "Data Reliability Engineers",
+    idea: "AI Powered Log Analyzer: Analyze Smarter, Deliver Faster",
+    summary: "Used GitLab Duo across the entire SDLC — from requirement summarization to Spark/SQL debugging to code refactoring. Reduced defect analysis time by 40% and debugging effort by 50%, while improving PySpark optimization turnaround by 35%. A comprehensive, end-to-end productivity lift across the development lifecycle.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "75%",
+    accLift: "20%",
+    impact: "39/100"
+  },
+  {
+    team: "Auto Minds",
+    idea: "AI-Driven Validation Engine— Goodbye Manual SQL, Hello Automation",
+    summary: "Replaces manual SQL-writing for data validation with an intelligent engine that reads mapping documents and auto-generates accurate validation queries — even in reverse. Covers direct mapping, transformation, default-value, and complex logic validation. Delivers 70–80% effort reduction and 2–3x productivity gains at enterprise scale.",
+    category: 2,
+    tools: "MS Copilot",
+    prodLift: "67%",
+    accLift: "10%",
+    impact: "44/100"
+  },
+  {
+    team: "Ronin",
+    idea: "Copliot Powered SmartQA Agent — Accelerating Quality Engineering with AI",
+    summary: "Built a Copilot-based QA agent that reads JIRA stories and generates comprehensive test cases, then assists with automation debugging and root-cause analysis. Needs only ~10% human validation before execution, keeping governance intact and accelerating regression cycles.",
+    category: 0,
+    tools: "MS Copilot",
+    prodLift: "50%",
+    accLift: "30%",
+    impact: "52/100"
+  },
+  {
+    team: "Solo Forge",
+    idea: "ActionFlow — Turning Meeting Chatter into Tracked Action Items",
+    summary: "Automatically converts Microsoft Teams meeting transcripts into tasks, owners, deadlines, and follow-ups — no manual note-taking required. Pushes tasks straight into Planner or Outlook/Teams and generates clean summaries for attendees. Cuts post-meeting admin time from 8 hours to 2 hours a week while lifting accuracy from 75% to 92%.",
+    category: 0,
+    tools: "MS Copilot",
+    prodLift: "75%",
+    accLift: "17%",
+    impact: "34/100"
+  },
+  {
+    team: "AI @ Workplace",
+    idea: "From 3 Hours to 30 Minutes — Copilot-Powered Data Validation",
+    summary: "Replaced slow manual dataset ingestion and query-running with Copilot-driven summarization that surfaces exceptions and suggestions automatically. What used to take up to 3 hours of validation work now takes about 30 minutes. A simple but high-impact productivity win for everyday data analysis tasks.",
+    category: 0,
+    tools: "MS Copilot",
+    prodLift: "83%",
+    accLift: "20%",
+    impact: "39/100"
+  },
+  {
+    team: "MAD",
+    idea: "AI Everyday — Your Developer Companion Across the Engineering Lifecycle",
+    summary: "Integrated AI as a force multiplier for bug fixes, testing, and onboarding new engineers by mapping complex service flows. Chain-of-thought prompting helped parse logs, find root causes, and maintain rigorous Selenium test coverage. Cut dev-and-test cycle time from 16 hours to 6 hours while improving issue-resolution accuracy from 60% to 80%.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "63%",
+    accLift: "20%",
+    impact: "45/100"
+  },
+  {
+    team: "Justice League",
+    idea: "Metadata Tracking, Automated — 88% Faster Big Data Workflows",
+    summary: "Built a GitLab Duo-powered Python script to automatically track job metadata (dataset versions, row counts, execution times) across 60–600 daily jobs. Cut per-run tracking time from 60 minutes to just 6–7 minutes, while pushing accuracy from ~90% to a full 100%. A small script with an outsized impact on operational cost control.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "89%",
+    accLift: "13%",
+    impact: "47/100"
+  },
+  {
+    team: "Myself",
+    idea: "Ab Initio AI Assistant: Small Wins That Add Up to Big Productivity",
+    summary: "Applied AI tools for debugging, code optimization, and research — from generating bulk insert queries to structuring project documentation. Helped find information in minutes that once took much longer to track down. A practical, hands-on example of AI easing the small frictions of daily engineering work.",
+    category: 0,
+    tools: "MS Copilot",
+    prodLift: "50%",
+    accLift: "-",
+    impact: "19/100"
+  },
+  {
+    team: "The FineTuners",
+    idea: "Reconciliation, Reinvented — Copilot Powers an 8-Rule Validation Framework",
+    summary: "Applied a structured 8-rule validation framework via Microsoft Copilot to transform manual data validation, reconciliation, and SLA analysis into repeatable, auditable processes. Delivered up to 80% effort reduction, 30+ hours saved monthly, and 12x faster SLA analysis. Accuracy jumped from a typical 75% baseline to 95–100% repeatable outcomes.",
+    category: 1,
+    tools: "MS Copilot",
+    prodLift: "50%",
+    accLift: "20%",
+    impact: "35/100"
+  },
+  {
+    team: "Project B-Scale",
+    idea: "AI Powered Data Integrity at Scale — From 60% Dropped Records to Complete Ingestion",
+    summary: "Discovered that Spark's native Parquet reader was silently dropping 60% of records across 13,000+ files (28 billion records!) due to schema mismatches. Used GitLab Duo's chain-of-thought and few-shot prompting to design a checksum-based grouping strategy that processes all files without loss. A genuinely critical data-integrity fix, lifting accuracy by 60%.",
+    category: 1,
+    tools: "GitLab Duo",
+    prodLift: "90%",
+    accLift: "50%",
+    impact: "62/100"
+  },
+  {
+    team: "Code Decode",
+    idea: "Breaking Open a Legacy Black Box — From 1 Week to 4 Hours",
+    summary: "Leveraged AI to decode an undocumented legacy system that converts XML files into yield curves — reverse-engineering the hidden formulas and business rules by comparing source and target outputs. Turned a task that typically took over a week into just four hours of work. A 95%+ reduction in time spent untangling opaque legacy logic.",
+    category: 2,
+    tools: "MS Copilot",
+    prodLift: "80%",
+    accLift: "-",
+    impact: "44/100"
+  },
+  {
+    team: "Byte Force",
+    idea: "PowerShell Scripting, Reimagined — 4x Faster, More Accurate File Transfers",
+    summary: "Moved from manually coding PowerShell scripts for inter-server file transfers to an AI agent that generates full scripts from plain-language requirements. Boosted accuracy from 75% to 90% while cutting development time from 20 hours to just 5 hours a week. Human-in-the-loop review keeps quality intact while AI handles the heavy lifting.",
+    category: 0,
+    tools: "MS Copilot",
+    prodLift: "75%",
+    accLift: "15%",
+    impact: "53/100"
+  },
+  {
+    team: "BAQAI Force",
+    idea: "2x Faster BA & QA Delivery — Enterprise AI Across the SDLC",
+    summary: "Embedded AI across requirements gathering, knowledge retrieval, analytics, and QA test prep — cutting documentation effort by 60%, search time by 90%, and analysis effort by 80%. Test-case creation for hundreds of scenarios saw a 60% effort reduction too. The combined effect: nearly double the delivery speed across the whole software lifecycle.",
+    category: 2,
+    tools: "MS Copilot, GitLab Duo",
+    prodLift: "50%",
+    accLift: "10%",
+    impact: "48/100"
+  },
+  {
+    team: "AI Accelerators",
+    idea: "Prompt-Driven Data Engineering: Transforming Spark/Scala coding & Debugging Workflows",
+    summary: "Combined GitLab Duo and Microsoft Copilot to streamline Spark/Scala coding, SQL generation, debugging, documentation, and test prep in one workflow. Engineers get implementation suggestions, optimized queries, and root-cause analysis within minutes — always with human review to guard against hallucinations. Cut weekly repetitive-task effort from 16 hours to 9, while lifting first-pass quality from 75% to 88%.",
+    category: 0,
+    tools: "MS Copilot, GitLab Duo",
+    prodLift: "50%",
+    accLift: "15%",
+    impact: "28/100"
+  },
+  {
+    team: "Magnum",
+    idea: "GitLab Duo in Action — AI Across the Development Lifecycle — atleast 30-40% Productivity Boost",
+    summary: "Leverage GitLab Duo for code generation, completion, defect analysis, test-case generation, and automated code review on every merge request. Cut per-developer weekly workload from 40 hours to 30 hours through consistent AI assistance. A broad, practical showcase of Duo's impact across the full development cycle.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "67%",
+    accLift: "15%",
+    impact: "55/100"
+  },
+  {
+    team: "Insight Labs",
+    idea: "Reverse-Engineering Great Prompts — Building a 10x Prompt Library",
+    summary: "Instead of relying on trial-and-error AI conversations, deconstructed high-quality AI outputs to reveal the prompt patterns behind them — then codified those patterns into a reusable, version-controlled template library. Their \"5 C's\" framework significantly accelerating Developer productivity through a shared library of optimized prompts and best practices. Result: fewer bugs and 95% team adoption of the new prompt discipline.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "40%",
+    accLift: "20%",
+    impact: "46/100"
+  },
+  {
+    team: "Artificially Intelligent",
+    idea: "Reusable AI Powered Data Validation Factory for Data Feeds",
+    summary: "Automated the end-to-end control validation lifecycle — creation, reconciliation, execution, exception analysis, and audit reporting. Reduced validation effort by ~89%, making it immediately reusable across teams. A blueprint for AI-powered controls automation at enterprise scale.",
+    category: 3,
+    tools: "MS Copilot, GitLab Duo",
+    prodLift: "89%",
+    accLift: "15%",
+    impact: "53/100"
+  },
+  {
+    team: "TraceIQ",
+    idea: "Agentic QA — Test Case Generation Meets Requirement Drift Detection",
+    summary: "Built resuable Copilot-powered agents and curated prompt frameworks that transform JIRA stories, emails, and docs to auto-generate comprehensive test scenarios while also flagging requirement drift. Delivered a 50% reduction in manual testing effort and 3–4 hours of daily productivity savings, alongside broader test coverage and faster regression cycles. Human-in-the-loop review keeps governance intact throughout.",
+    category: 3,
+    tools: "MS Copilot, GitLab Duo",
+    prodLift: "43%",
+    accLift: "15%",
+    impact: "49/100"
+  },
+  {
+    team: "EXL DuoLift",
+    idea: "Next-Gen BFSI Analytics: AI-Powered Databricks Lakehouse",
+    summary: "Transformed a legacy BFSI data platform into a real-time AI-assisted Databricks Lakehouse. Delivering faster analytics, 25% lower data latency, 100% data governance compliance, 87% quicker deployments with substantially lower infrastructure costs through automation, optimization and scalable data architechture.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "85%",
+    accLift: "15%",
+    impact: "40/100"
+  },
+  {
+    team: "CodeGuard AI",
+    idea: "AI-Powered Code Coverage Optimization for JAVA Applications",
+    summary: "Leveraged AI to accelerate delivery of high-impact solutions including Bulk Trade Confirmation, Auto Client Close automation and automated risk reporting, significantly reducing manual effort and turnaround time. Enabled faster development and stronger risk controls through AI assisted engineering and automation.",
+    category: 0,
+    tools: "GitLab Duo",
+    prodLift: "40%",
+    accLift: "25%",
+    impact: "28/100"
+  },
+  {
+    team: "Delta Minds",
+    idea: "Smarter Coding, Faster Computing: The GitLab Duo Advantage",
+    summary: "Leveraged GitLab Duo to accelerate development and optimize code performance, while boosting developer productivity through AI-assisted code generation.",
+    category: 0,
+    tools: "MS Copilot, GitLab Duo",
+    prodLift: "40%",
+    accLift: "10%",
+    impact: "25/100"
+  }
+];
+
+const CATEGORIES = [
+  { name: "Productivity Lift",   code: "P" },
+  { name: "Accuracy Lift",       code: "A" },
+  { name: "Project Management",  code: "M" },
+  { name: "New & Unique Idea",   code: "N" }
+];
+
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+let rounds = shuffle(IDEAS);
+let idx = 0, score = 0, correct = 0, answered = false;
+$('total').textContent = rounds.length;
+
+function render(){
+  if(idx >= rounds.length){ finish(); return; }
+  answered = false;
+  const r = rounds[idx];
+  $('round').textContent = idx+1;
+  $('prog').style.width = (idx/rounds.length*100)+'%';
+  $('team').textContent = r.team;
+  $('summary').textContent = r.summary;
+  $('tools').innerHTML = `<strong>AI Tools Used:</strong> ${esc(r.tools || 'Not specified')}`;
+  $('headlineHint').textContent = '';
+  $('feedback').className = 'feedback';
+  $('feedback').innerHTML = '';
+  $('nextBtn').disabled = true;
+
+  const wrap = $('themes');
+  wrap.innerHTML = '';
+  CATEGORIES.forEach((cat) => {
+    const d = document.createElement('div');
+    d.className = 'drop';
+    d.dataset.cat = CATEGORIES.indexOf(cat);
+    d.dataset.code = cat.code;
+    d.innerHTML = `
+      <div>
+        <div class="theme-badge">${cat.code}</div>
+        <div class="theme-name">${esc(cat.name)}</div>
+      </div>
+      <div class="drop-hint">Drop summary here</div>
+    `;
+    wrap.appendChild(d);
+  });
+
+  attachDrag($('summaryCard'));
+}
+
+function check(chosenCat, zone){
+  if(answered) return;
+  answered = true;
+  const r = rounds[idx];
+  const ok = Number(chosenCat) === Number(r.category);
+  zone.classList.add(ok ? 'correct' : 'wrong');
+  if(ok){ correct++; score += 100; }
+  $('correct').textContent = correct;
+  $('score').textContent = score;
+  $('feedback').className = 'feedback show ' + (ok ? 'ok' : 'no');
+  $('feedback').innerHTML = ok
+    ? `<strong>Correct!</strong> ${esc(CATEGORIES[r.category].name)} is the right theme. <span class="dim">Impact score: ${esc(r.impact)}</span>`
+    : `<strong>Not this one.</strong> The correct theme is <strong>${esc(CATEGORIES[r.category].name)}</strong>. <span class="dim">Impact score: ${esc(r.impact)}</span>`;
+  $('headlineHint').textContent = r.idea;
+  $('nextBtn').disabled = false;
+  document.querySelectorAll('.drop').forEach(x => x.style.pointerEvents = 'none');
+}
+
+function nextRound(){ idx++; render(); }
+
+function finish(){
+  $('game').style.display = 'none';
+  $('finish').classList.add('show');
+  $('prog').style.width = '100%';
+  $('finalScore').textContent = score;
+  $('finalText').textContent = `You matched ${correct} of ${rounds.length} summaries correctly.`;
+}
+
+function restart(){
+  rounds = shuffle(IDEAS);
+  idx = 0; score = 0; correct = 0;
+  $('correct').textContent = 0;
+  $('score').textContent = 0;
+  $('game').style.display = 'grid';
+  $('finish').classList.remove('show');
+  render();
+}
+
+function toggleFullscreen(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+}
+
+/* ===================== Drag and drop (mouse + touch) ===================== */
+function getPoint(e){
+  if(e.touches && e.touches.length) return {x: e.touches[0].clientX, y: e.touches[0].clientY};
+  if(e.changedTouches && e.changedTouches.length) return {x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY};
+  return {x: e.clientX, y: e.clientY};
+}
+
+function attachDrag(card){
+  let startX, startY, origLeft, origTop, origWidth, placeholder, dragging = false;
+
+  function onDown(e){
+    if(answered) return;
+    if(e.cancelable) e.preventDefault();
+    dragging = true;
+
+    const p = getPoint(e);
+    const rect = card.getBoundingClientRect();
+    origLeft = rect.left; origTop = rect.top; origWidth = rect.width;
+    startX = p.x; startY = p.y;
+
+    placeholder = document.createElement('div');
+    placeholder.style.height = rect.height + 'px';
+    card.parentNode.insertBefore(placeholder, card);
+
+    card.classList.add('dragging');
+    card.style.left = origLeft + 'px';
+    card.style.top = origTop + 'px';
+    card.style.width = origWidth + 'px';
+    document.body.appendChild(card);
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchmove', onMove, {passive:false});
+    document.addEventListener('touchend', onUp);
+    document.addEventListener('touchcancel', onUp);
+  }
+
+  function onMove(e){
+    if(!dragging) return;
+    if(e.cancelable) e.preventDefault();
+    const p = getPoint(e);
+    const dx = p.x - startX;
+    const dy = p.y - startY;
+    card.style.left = (origLeft + dx) + 'px';
+    card.style.top = (origTop + dy) + 'px';
+
+    document.querySelectorAll('.drop').forEach(d => d.classList.remove('over'));
+    const under = document.elementFromPoint(p.x, p.y);
+    const zone = under && under.closest ? under.closest('.drop') : null;
+    if(zone && !answered) zone.classList.add('over');
+  }
+
+  function onUp(e){
+    if(!dragging) return;
+    dragging = false;
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onUp);
+    document.removeEventListener('touchcancel', onUp);
+    document.querySelectorAll('.drop').forEach(d => d.classList.remove('over'));
+
+    const p = getPoint(e);
+    const under = document.elementFromPoint(p.x, p.y);
+    const zone = under && under.closest ? under.closest('.drop') : null;
+
+    card.classList.add('snapback');
+    card.style.left = origLeft + 'px';
+    card.style.top = origTop + 'px';
+    card.style.width = origWidth + 'px';
+
+    setTimeout(() => {
+      card.classList.remove('dragging','snapback');
+      card.style.position = '';
+      card.style.left = '';
+      card.style.top = '';
+      card.style.width = '';
+      placeholder.parentNode.replaceChild(card, placeholder);
+      if(zone && !answered) check(zone.dataset.cat, zone);
+    }, 220);
+  }
+
+  card.addEventListener('mousedown', onDown);
+  card.addEventListener('touchstart', onDown, {passive:false});
+}
+
+render();
+</script>
+</body>
+</html>
